@@ -1,0 +1,22 @@
+//How to start it in truffle
+
+ganache-cli -p 8545
+-Open new bash
+ganache-cli -p 8546
+
+
+New bashes:
+onEach{
+	cd C:/Company/Code/ethereum-bridge
+	node bridge -H localhost:[8545 / 8546] -a 1
+}
+
+
+New bashes:
+onEach{
+	cd C:/Company/Code/Oracle_bridge
+	truffle compile
+	truffle migrate --network [development / dev2]
+}
+
+
