@@ -6,22 +6,27 @@ import "usingOraclize.sol"
 
 //This is the basic wrapped Ether to a different chain contract. 
 //All money deposited is transformed into ERC20 tokens at the rate of 1 wei = 1 token
-contract Childchain_Bridge is usingOraclize{
+contract Bridge is usingOraclize{
 
   using SafeMath for uint256;
 
   /*Variables*/
-  address pulbic OAR;
 
   //ERC20 fields
-  string public mainChain = "json(http://localhost:8545).result"; // { return balances[_owner]; } {"jsonrpc":"2.0","id":1,"method":"eth_blockNumber","params":[]}
+  string public bridgedChain;
   uint public total_supply;
-  event Print (string _string);
+  uint last_check;
 
+
+  struct{
+    uint time_sent;
+    uint _amount_reqlocked;
+  }
 
   //ERC20 fields
   mapping(address => uint) balances;
   mapping(address => uint) locked_amount;
+  mapping(bytes32 => uint) locked_amount;
 
   /*Events*/
 
@@ -29,13 +34,6 @@ contract Childchain_Bridge is usingOraclize{
   event StateChanged(bool _success, string _message);
 
   /*Functions*/
-  function Childchain_Bridge(address _oraclize_add){
-     OAR = OraclizeAddrResolverI(_oraclize_add);
-  }
-
-  function blockNumber() public returns(string _newstring){
-
-  }
 
   //This function creates tokens equal in value to the amount sent to the contract
   function deposit() public payable {
@@ -55,11 +53,32 @@ contract Childchain_Bridge is usingOraclize{
     msg.sender.transfer(_value);
   }
 
-
   //Returns the balance associated with the passed in _owner
   function balanceOf(address _owner) public constant returns (uint bal) { return balances[_owner]; }
 
   function balanceLocked(address _owner) public constant returns (uint bal) { return locked_amount[_owner]; }
+
+
+  function setBridge(string _chain) public{
+    bridgedChain = "json(http://localhost:9545).result";
+  }
+  /*
+  * Allows for a transfer of tokens to _to
+  *
+  * @param "_to": The address to send tokens to
+  * @param "_amount": The amount of tokens to send
+  */
+  function lockforTransfer(uint _amount) public returns (bool success) {
+    if (balances[msg.sender] >= _amount
+    && _amount > 0
+    && locked_amount[msg.sender] + _amount > locked_amount[msg.sender]) {
+      locked_amount[msg.sender] = locked_amount[msg.sender].add(_amount);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
 
   /*
   * Allows for a transfer of tokens to _to
@@ -67,21 +86,22 @@ contract Childchain_Bridge is usingOraclize{
   * @param "_to": The address to send tokens to
   * @param "_amount": The amount of tokens to send
   */
-  function lockforTransfer(address _to, uint _amount) public returns (bool success) {
-    if (balances[msg.sender] >= _amount
+  function unlockEther(uint _amount) public returns (bool success){
+    if (locked_amount[msg.sender] >= _amount
     && _amount > 0
-    && balances[_to] + _amount > balances[_to]) {
-      balances[msg.sender] = balances[msg.sender].sub(_amount);
-      balances[_to] = balances[_to].add(_amount);
+    && locked_amount[msg.sender] + _amount > locked_amount[msg.sender]) {
+      blocked_amount[msg.sender] = locked_amount[msg.sender].add(_amount);
       return true;
     } else {
       return false;
     }
   }
 
-  function unlockEther(uint _amount) public returns (bool success){
-    return true;
+  function checkChild() internal returns(uint _amount){
 
   }
 
+  function _callback() public returns(bool _success)public{
+    
+  }
 }
