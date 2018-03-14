@@ -1,6 +1,6 @@
 # Oracle bridge
 
-![Photocoin](./public/bridge.jpeg)
+![Bridge](./public/bridge.jpg)
 
 #Contracts
 
