@@ -13,13 +13,20 @@ contract Mainchain_Bridge is usingOraclize{
   /*Variables*/
 
   //ERC20 fields
-  string public childChain = "json(http://localhost:8546).result"; // { return balances[_owner]; }
+  string public childChain = "json(http://localhost:9545).result"; // { return balances[_owner]; }
   uint public total_supply;
+  uint last_check;
 
+
+  struct{
+    uint time_sent;
+    uint _amount_reqlocked;
+  }
 
   //ERC20 fields
   mapping(address => uint) balances;
   mapping(address => uint) locked_amount;
+  mapping(bytes32 => uint) locked_amount;
 
   /*Events*/
 
@@ -57,21 +64,40 @@ contract Mainchain_Bridge is usingOraclize{
   * @param "_to": The address to send tokens to
   * @param "_amount": The amount of tokens to send
   */
-  function lockforTransfer(address _to, uint _amount) public returns (bool success) {
+  function lockforTransfer(uint _amount) public returns (bool success) {
     if (balances[msg.sender] >= _amount
     && _amount > 0
-    && balances[_to] + _amount > balances[_to]) {
-      balances[msg.sender] = balances[msg.sender].sub(_amount);
-      balances[_to] = balances[_to].add(_amount);
+    && locked_amount[msg.sender] + _amount > locked_amount[msg.sender]) {
+      locked_amount[msg.sender] = locked_amount[msg.sender].add(_amount);
       return true;
     } else {
       return false;
     }
   }
 
+
+  /*
+  * Allows for a transfer of tokens to _to
+  *
+  * @param "_to": The address to send tokens to
+  * @param "_amount": The amount of tokens to send
+  */
   function unlockEther(uint _amount) public returns (bool success){
-    return true;
+    if (locked_amount[msg.sender] >= _amount
+    && _amount > 0
+    && locked_amount[msg.sender] + _amount > locked_amount[msg.sender]) {
+      blocked_amount[msg.sender] = locked_amount[msg.sender].add(_amount);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  function checkChild() internal returns(uint _amount){
 
   }
 
+  function _callback() public returns(bool _success)public{
+    
+  }
 }

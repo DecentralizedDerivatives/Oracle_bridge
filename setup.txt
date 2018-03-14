@@ -20,3 +20,33 @@ onEach{
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//To do:
+Pass just Ether to contract
+or...can we have the tokens on the mainchain and everything else off chain?
+
+
+We would need to pass:
+M -> C:
+Info to start contract
+Account balances at end
+
+C->M
+Token creation event would pass tokens to mainchain
+Once calculated, info would need to be passed to mainchain for withdrawals of locked Ether
+
