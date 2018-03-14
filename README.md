@@ -55,12 +55,20 @@ Note - all Ether should be wrapped (just do tokens)
            This has to be for certain number of blocks/time
 
         requestUnlock() //sends Oraclize call to other chain
+        recieveToken() //sends Oraclize call to other chain to see if they locked something for this chain
         _callback() //call from Oraclize that unlocks Ether from requested parties
+        setBridge() //allows you to put in the name of the bridge
+        // This is the hosted api of the other node.  If you are on local host, it looks like this:, but if you want to connect to the mainnet, you would use Infura and it looks like this:
 
 
 
-### Walkthrouh
+### Walkthrough
 
+
+
+### Centralization and other concerns
+
+Rather than be reliant on a POA network or trusted relayers to do the work, the trust in this mechanism is placed on the party hosting the API and the Oraclize service.  It's a different form of trust than relying on a centralized party to validate all transactions and with the use of trusted hardware and other incentive mechanisms for the hosts, this solution provides a method that is easy to deploy, easy to understand, and very close to the true goal of complete trustlessness.  
 
 #### Notes:
 
