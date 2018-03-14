@@ -4,13 +4,23 @@
 
 #Contracts
 
-##Bridge Contracts
+## Mainchain
+	
+#### The Bridge Contract
 
-###Structure
+## Sidechain
 
-###General
+#### The Bridge Contract
 
-###Setup
+#### DDA Factory Contract
+
+#### Decentralized Exchange Contract
+
+### Structure
+
+### General
+
+### Setup
 Start the mainchain at 9545
 Open Ethereum Bridge on mainchain
 Create contract with OARAddress
@@ -19,9 +29,9 @@ Start the childchain at 8545
 Open Ethereum Bridge on childchain
 Create contract with OARAddress
 
-###Functions and Variables 
+### Functions and Variables 
 
-###Walkthrouh
+### Walkthrouh
 
 
 #### Notes:
