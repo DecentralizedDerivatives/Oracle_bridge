@@ -86,7 +86,7 @@ contract Bridge is usingOraclize{
   * @param "_to": The address to send tokens to
   * @param "_amount": The amount of tokens to send
   */
-  function unlockEther(uint _amount) public returns (bool success){
+  function requestUnlock(uint _amount) public returns (bool success){
     if (locked_amount[msg.sender] >= _amount
     && _amount > 0
     && locked_amount[msg.sender] + _amount > locked_amount[msg.sender]) {
