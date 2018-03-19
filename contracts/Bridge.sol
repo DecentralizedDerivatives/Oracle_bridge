@@ -1,37 +1,38 @@
 pragma solidity ^0.4.17;
 
 import "./libraries/SafeMath.sol";
-import "usingOraclize.sol"
+import "./Connector.sol";
 
 
 //This is the basic wrapped Ether to a different chain contract. 
 //All money deposited is transformed into ERC20 tokens at the rate of 1 wei = 1 token
-contract Bridge is usingOraclize{
+contract Bridge is Connector{
 
   using SafeMath for uint256;
 
   /*Variables*/
-
-  //ERC20 fields
   string public bridgedChain;
   uint public total_supply;
-  uint last_check;
+  uint public total_locked;
+  uint public last_check;
+  address public connector_Address;
 
+  Connector_Interface connector;
 
-  struct{
-    uint time_sent;
-    uint _amount_reqlocked;
-  }
-
-  //ERC20 fields
   mapping(address => uint) balances;
   mapping(address => uint) locked_amount;
-  mapping(bytes32 => uint) locked_amount;
+  mapping(address => uint) time_locked; //parties must wait X minutes before withdrawing once locked
+  
+  /***MODIFIERS***/
+  /// @dev Access modifier for Owner functionality
+  modifier onlyOwner() {
+      require(msg.sender == owner);
+      _;
+  }
 
   /*Events*/
 
-  event Transferred(address indexed _from, address indexed _to, uint _value);
-  event StateChanged(bool _success, string _message);
+  event Locked(address _from, uint _value);
 
   /*Functions*/
 
@@ -40,6 +41,14 @@ contract Bridge is usingOraclize{
     require(msg.value > 0);
     balances[msg.sender] = balances[msg.sender].add(msg.value);
     total_supply = total_supply.add(msg.value);
+  }
+
+  /**
+  *@Note we have this here so that you can change the oraclize string if necessary (can we figure out a better way?)
+  *
+  */
+  function setConnector(address _conn) public onlyOwner(){
+    connector = Connector_Interface(_conn);
   }
 
   /*
@@ -54,29 +63,36 @@ contract Bridge is usingOraclize{
   }
 
   //Returns the balance associated with the passed in _owner
-  function balanceOf(address _owner) public constant returns (uint bal) { return balances[_owner]; }
+  function balanceOf(address _owner) public constant returns (uint) { return balances[_owner]; }
 
-  function balanceLocked(address _owner) public constant returns (uint bal) { return locked_amount[_owner]; }
+  function balanceLocked(address _owner) public constant returns (uint) { return locked_amount[_owner]; }
 
-
-  function setBridge(string _chain) public{
-    bridgedChain = "json(http://localhost:9545).result";
+  function getCurrentTime() public constant returns (uint){
+    return now;
   }
+
   /*
   * Allows for a transfer of tokens to _to
   *
   * @param "_to": The address to send tokens to
   * @param "_amount": The amount of tokens to send
   */
-  function lockforTransfer(uint _amount) public returns (bool success) {
+  function lockforTransfer(uint _amount) public returns (bool) {
     if (balances[msg.sender] >= _amount
     && _amount > 0
     && locked_amount[msg.sender] + _amount > locked_amount[msg.sender]) {
       locked_amount[msg.sender] = locked_amount[msg.sender].add(_amount);
+      time_locked[msg.sender] = now;
+      Locked(msg.sender,_amount);
       return true;
     } else {
       return false;
     }
+  }
+
+  function getMethods() public constant returns(bytes4,bytes4){
+       return this.balanceLocked.selector;
+       return this.getCurrentTime.selector;
   }
 
 
@@ -86,22 +102,9 @@ contract Bridge is usingOraclize{
   * @param "_to": The address to send tokens to
   * @param "_amount": The amount of tokens to send
   */
-  function requestUnlock(uint _amount) public returns (bool success){
-    if (locked_amount[msg.sender] >= _amount
-    && _amount > 0
-    && locked_amount[msg.sender] + _amount > locked_amount[msg.sender]) {
-      blocked_amount[msg.sender] = locked_amount[msg.sender].add(_amount);
-      return true;
-    } else {
-      return false;
-    }
+  function requestUnlock(uint _amount) public payable{
+    require(time_locked[msg.sender] + 86400/24 < now)
+    connector.checkChild(msg.sender);
   }
 
-  function checkChild() internal returns(uint _amount){
-
-  }
-
-  function _callback() public returns(bool _success)public{
-    
-  }
 }
