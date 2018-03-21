@@ -6,22 +6,25 @@ import "./Connector.sol";
 
 //This is the basic wrapped Ether to a different chain contract. 
 //All money deposited is transformed into ERC20 tokens at the rate of 1 wei = 1 token
-contract Bridge is Connector{
+  /*You push money when you transfer (delete money here).  If it doesn't go through, you can check to see if transfer ID went through
+  --How do we deal with livliness assumption? (do we?)
+-We need to add ERC20 functionality to represent the Ether transferred from the other contract
+  */
+contract Bridge is Connector,Wrapped_Token{
 
   using SafeMath for uint256;
 
-  /*Variables*/
+  /***VARIABLES***/
   string public bridgedChain;
-  uint public total_supply;
+  uint public total_deposited_supply;
   uint public total_locked;
-  uint public last_check;
   address public connector_Address;
+  uint transNonce;
 
-  Connector_Interface connector;
 
-  mapping(address => uint) balances;
+  /***STORAGE***/
+  mapping(address => uint) deposited_balances;
   mapping(address => uint) locked_amount;
-  mapping(address => uint) time_locked; //parties must wait X minutes before withdrawing once locked
   
   /***MODIFIERS***/
   /// @dev Access modifier for Owner functionality
@@ -30,25 +33,17 @@ contract Bridge is Connector{
       _;
   }
 
-  /*Events*/
+  /***EVENTS***/
 
   event Locked(address _from, uint _value);
 
-  /*Functions*/
+  /***FUNCTIONS***/
 
   //This function creates tokens equal in value to the amount sent to the contract
   function deposit() public payable {
     require(msg.value > 0);
-    balances[msg.sender] = balances[msg.sender].add(msg.value);
-    total_supply = total_supply.add(msg.value);
-  }
-
-  /**
-  *@Note we have this here so that you can change the oraclize string if necessary (can we figure out a better way?)
-  *
-  */
-  function setConnector(address _conn) public onlyOwner(){
-    connector = Connector_Interface(_conn);
+    deposited_balances[msg.sender] = deposited_balances[msg.sender].add(msg.value);
+    total_deposited_supply = total_deposited_supply.add(msg.value);
   }
 
   /*
@@ -57,53 +52,62 @@ contract Bridge is Connector{
   * @param "_amount": The amount of the token to unwrap
   */
   function withdraw(uint _value) public {
+    require(balances[msg.sender] >= _value);
+    balances[msg.sender] = balances[msg.sender].sub(_value);
+    total_supply = total_supply.sub(_value);
+    msg.sender.transfer(_value);
+  }
+
+
+  /*
+  * This function 'unwraps' an _amount of Ether in the sender's balance by transferring Ether to them
+  *
+  * @param "_amount": The amount of the token to unwrap
+  */
+  function destroyToken(uint _value) public {
     balances[msg.sender] = balances[msg.sender].sub(_value);
     total_supply = total_supply.sub(_value);
     msg.sender.transfer(_value);
   }
 
   //Returns the balance associated with the passed in _owner
-  function balanceOf(address _owner) public constant returns (uint) { return balances[_owner]; }
+  function depositedBalanceOf(address _owner) public constant returns (uint) { return balances[_owner]; }
 
-  function balanceLocked(address _owner) public constant returns (uint) { return locked_amount[_owner]; }
-
-  function getCurrentTime() public constant returns (uint){
-    return now;
-  }
-
-  /*
+/*
   * Allows for a transfer of tokens to _to
   *
   * @param "_to": The address to send tokens to
   * @param "_amount": The amount of tokens to send
   */
-  function lockforTransfer(uint _amount) public returns (bool) {
-    if (balances[msg.sender] >= _amount
-    && _amount > 0
-    && locked_amount[msg.sender] + _amount > locked_amount[msg.sender]) {
+  function transferOver(uint _amount) public{
+    require (balances[msg.sender] >= _amount && _amount > 0);
       locked_amount[msg.sender] = locked_amount[msg.sender].add(_amount);
       time_locked[msg.sender] = now;
+      balances[msg.sender] = balances[msg.sender].sub(_amount);
       Locked(msg.sender,_amount);
-      return true;
-    } else {
-      return false;
-    }
+      transNonce += 1;
+      pushToOtherChain(_amount,msg.sender,transNonce);
   }
 
-  function getMethods() public constant returns(bytes4,bytes4){
-       return this.balanceLocked.selector;
-       return this.getCurrentTime.selector;
+  //Should we have an ID and amount to allow people to withdraw if transfer doesn't go through? -- but why wouldn't it go through?
+  //The bool is for if it's ETH or if this is the sidechian sending back the token(?)
+  function receiveTransfer(bool isETH, uint _amount, address _reciever,uint transfer_Id){
+
+
+  }
+
+  function getMethod() public constant returns(bytes4,bytes4){
+       return this.receiveTransfer.selector;
   }
 
 
   /*
   * Allows for a transfer of tokens to _to
-  *
   * @param "_to": The address to send tokens to
   * @param "_amount": The amount of tokens to send
   */
   function requestUnlock(uint _amount) public payable{
-    require(time_locked[msg.sender] + 86400/24 < now)
+    require(time_locked[msg.sender] + 2*86400/24 < now)
     connector.checkChild(msg.sender);
   }
 
