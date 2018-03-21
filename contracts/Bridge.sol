@@ -20,12 +20,19 @@ contract Bridge is Connector,Wrapped_Token{
   uint public total_locked;
   address public connector_Address;
   uint transNonce;
+  bool isMainChain;
 
 
+  struct Locked{
+    uint amount;
+    address owner;
+
+  }
   /***STORAGE***/
   mapping(address => uint) deposited_balances;
-  mapping(address => uint) locked_amount;
-  
+  mapping(uint => Locked) transferDetails; //maps a transferId to an amount
+  mapping(address => uint[]) transferList; //list of all transfers from an address;
+
   /***MODIFIERS***/
   /// @dev Access modifier for Owner functionality
   modifier onlyOwner() {
@@ -38,77 +45,55 @@ contract Bridge is Connector,Wrapped_Token{
   event Locked(address _from, uint _value);
 
   /***FUNCTIONS***/
-
-  //This function creates tokens equal in value to the amount sent to the contract
-  function deposit() public payable {
-    require(msg.value > 0);
-    deposited_balances[msg.sender] = deposited_balances[msg.sender].add(msg.value);
-    total_deposited_supply = total_deposited_supply.add(msg.value);
-  }
-
   /*
   * This function 'unwraps' an _amount of Ether in the sender's balance by transferring Ether to them
   *
   * @param "_amount": The amount of the token to unwrap
   */
   function withdraw(uint _value) public {
-    require(balances[msg.sender] >= _value);
-    balances[msg.sender] = balances[msg.sender].sub(_value);
-    total_supply = total_supply.sub(_value);
+    require(deposited_balances[msg.sender] >= _value);
+    deposited_balances[msg.sender] = deposited_balances[msg.sender].sub(_value);
+    total_deposited_supply = total_deposited_supply.sub(_value);
     msg.sender.transfer(_value);
   }
 
-
-  /*
-  * This function 'unwraps' an _amount of Ether in the sender's balance by transferring Ether to them
-  *
-  * @param "_amount": The amount of the token to unwrap
-  */
-  function destroyToken(uint _value) public {
-    balances[msg.sender] = balances[msg.sender].sub(_value);
-    total_supply = total_supply.sub(_value);
-    msg.sender.transfer(_value);
-  }
 
   //Returns the balance associated with the passed in _owner
-  function depositedBalanceOf(address _owner) public constant returns (uint) { return balances[_owner]; }
+  function depositedBalanceOf(address _owner) public constant returns (uint) { return deposited_balances[_owner]; }
 
+
+  function getTransfer(uint _transferId) public returns(uint,address){
+    Locked memory _locked = transferDetails[_transferId];
+    return(_locked.amount,_locked.owner)
+  }
 /*
   * Allows for a transfer of tokens to _to
   *
   * @param "_to": The address to send tokens to
   * @param "_amount": The amount of tokens to send
   */
-  function transferOver(uint _amount) public{
-    require (balances[msg.sender] >= _amount && _amount > 0);
-      locked_amount[msg.sender] = locked_amount[msg.sender].add(_amount);
-      time_locked[msg.sender] = now;
-      balances[msg.sender] = balances[msg.sender].sub(_amount);
-      Locked(msg.sender,_amount);
-      transNonce += 1;
-      pushToOtherChain(_amount,msg.sender,transNonce);
-  }
-
-  //Should we have an ID and amount to allow people to withdraw if transfer doesn't go through? -- but why wouldn't it go through?
-  //The bool is for if it's ETH or if this is the sidechian sending back the token(?)
-  function receiveTransfer(bool isETH, uint _amount, address _reciever,uint transfer_Id){
-
-
+  function lockforTransfer(uint _amount, bool _eth) payable public returns(uint){
+    transNonce += 1;
+    if(isMainChain){
+       require(msg.value >= _amount && _amount > 0);
+       total_locked = total_locked.add(_amount);
+    }
+    else{
+        require (balances[msg.sender] >= _amount && _amount > 0);
+        balances[msg.sender] = balances[msg.sender].sub(_amount);
+        total_supply = total_supply.sub(_amount);
+    }
+    Locked(msg.sender,_amount);
+    Locked[transNonce].push({
+      amount:_amount,
+      owner:msg.sender
+      })
+    transferList[msg.sender].push(transNonce);
+    return(transNonce)
   }
 
   function getMethod() public constant returns(bytes4,bytes4){
-       return this.receiveTransfer.selector;
-  }
-
-
-  /*
-  * Allows for a transfer of tokens to _to
-  * @param "_to": The address to send tokens to
-  * @param "_amount": The amount of tokens to send
-  */
-  function requestUnlock(uint _amount) public payable{
-    require(time_locked[msg.sender] + 2*86400/24 < now)
-    connector.checkChild(msg.sender);
+       return this.getTransfer.selector;
   }
 
 }

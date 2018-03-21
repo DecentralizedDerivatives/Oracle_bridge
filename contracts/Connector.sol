@@ -18,11 +18,6 @@ contract Connector is usingOraclize{
   address public partnerBridge; //address of bridge contract on other chain
   string public api;
   string public parameters;
-  string public api_time;
-  string public parameters_time;
-
-  mapping(bytes32 => address) queryId;
-  mapping (bytes32 => address) timeId;
 
   event LogUpdated(string value);
   event LogNewOraclizeQuery(string description);
@@ -36,37 +31,29 @@ contract Connector is usingOraclize{
 
   	//we need to append address to end of data_string
 
-	function checkChild(address _sender) internal payable returns(uint){
+  function checkChild(uint _transferId) internal payable returns(uint){
       if (oraclize_getPrice("URL") * 2  > this.balance) {
           LogNewOraclizeQuery("Oraclize query was NOT sent, please add some ETH to cover for the query fee");
       } else {
           LogNewOraclizeQuery("Oraclize query was sent for locked balance");
-          var param_string  = strConcat(paramaters,_sender,'}, "latest"]}')
-          var oraclizeId = oraclize_query("URL",api,param_string);
+          var param_string  = strConcat(paramaters,_transferId,'}, "latest"]}')
+          oraclize_query("URL",api,param_string);
           //oraclize_query("URL","json(https://ropsten.infura.io/).result",'{"jsonrpc":"2.0","id":3,"method":"eth_call","params":[{"to":"0x76a83b371ab7232706eac16edf2b726f3a2dbe82","data":"0xad3b80a8"}, "latest"]}');
-          queryId[oraclizeId] = _sender;
-          LogNewOraclizeQuery("Oraclize query was sent for timestamp");
-          oraclizeId =  oraclize_query("URL",api_time,parameters_time);
-          timeId[oraclizeId] = now;
-          //oraclize_query("URL","json(https://ropsten.infura.io/).result",'{"jsonrpc":"2.0","id":3,"method":"eth_call","params":[{"to":"0x76a83b371ab7232706eac16edf2b726f3a2dbe82","data":"0xad3b80a8"}, "latest"]}');
-      }
+	 }
   }
 
    function __callback(bytes32 myid, string result) {
         require (msg.sender == oraclize_cbAddress());
-        var _amount = parseInt(result);
-        if (queryId[myId] != address(0)){
-       	require(balances[this.address] >= _amount
-		    && _amount > 0
-		    && locked_amount[msg.sender] + _amount > locked_amount[msg.sender]) {
-		      locked_amount[msg.sender] = locked_amount[msg.sender].add(_amount);
-		      time_locked[msg.sender] = now;
-		      Locked(msg.sender,_amount);
-
-        }
-        else if(timeId[myId] != address(0)){
-
-        }
+       	var _result = smt(result);
+       	var _value = _result[0];
+       	var _owner = _result[1];
+		if(isMainChain){
+			deposited_balances[_owner] = deposited_balances[_owner].add(_amount);
+			total_deposited_supply = total_deposited_supply.add(_amount);
+		}
+		else{
+			balances[_owner] = balances[_owner].add(_amount);
+		}
         LogUpdated(result);
     }
 
@@ -74,11 +61,6 @@ contract Connector is usingOraclize{
     function createQuery_value(string _api, string _params) public onlyOwner(){
     	api = _api;
     	parameters = _params;
-    }
-
-    function createQuery_time(string _api, string _params) public onlyOwner(){
-    	api_time = _api;
-    	parameters_time = _params;
     }
 
     function strConcat(string _a, string _b, string _c, string _d, string _e) internal returns (string){
@@ -101,5 +83,14 @@ contract Connector is usingOraclize{
 	function strConcat(string _a, string _b, string _c) internal returns (string) {
 	    return strConcat(_a, _b, _c, "", "");
 	}
+
+	function smt(string _s) {
+        var s = _s.toSlice();
+        var delim = ",".toSlice();
+        var parts = new uint[](s.count(delim));
+        for(uint i = 0; i < parts.length; i++) {
+           parts[i] = s.split(delim).toString();
+        }
+    }
 }
 
