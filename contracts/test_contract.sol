@@ -1,6 +1,6 @@
 //deployed on Ropsten at:0x76a83b371ab7232706eac16edf2b726f3a2dbe82
 pragma solidity ^0.4.17;
-import "github.com/oraclize/ethereum-api/oraclizeAPI.sol";
+/*import "github.com/oraclize/ethereum-api/oraclizeAPI.sol";
 
 contract test_contract { 
 	uint public last_a;
@@ -78,3 +78,4 @@ params -   {"jsonrpc":"2.0","id":3,"method":"eth_call","params":[{"to":"0x76a83b
 
 So your query will give you:
 ["json(https://ropsten.infura.io/).result"," {"jsonrpc":"2.0","id":3,"method":"eth_call","params":[{"to":"0x76a83b371ab7232706eac16edf2b726f3a2dbe82","data":"0xad3b80a8"}, "latest"]}"]
+*/
