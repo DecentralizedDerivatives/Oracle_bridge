@@ -104,20 +104,20 @@ The basic flow of seinding Ether to the other chain (mainchain to dappchain):
 
 ### Centralization and other concerns
 
-Centralization:
+#### Centralization:
 
 Rather than be reliant on a POA network or trusted relayers to do the work, the trust in this mechanism is placed on the party hosting the API and the Oraclize service.  It's a different form of trust than relying on a centralized party to validate all transactions and with the use of trusted hardware and other incentive mechanisms for the hosts, this solution provides a method that is easy to deploy, easy to understand, and very close to the true goal of complete trustlessness.  
 
-Node Survivability Assumptions:
+#### Node Survivability and Corruption Assumptions:
 
 The owner in these contracts can change the location of the API.  Ideally,  the changing of this value could be performed by a voting mechanism of stake holders.  
 
-Chain Survivability Assumptions:
+#### Chain Survivability Assumptions:
 
 What happens if the other chain dies or is attacked?
 
 
-Missed Oraclize calls:
+#### Missed Oraclize calls:
 
 Solved by having transerId's, you can query as many times as you want.
 
@@ -126,15 +126,13 @@ Solved by having transerId's, you can query as many times as you want.
 
 All contracts are created by the Decentralized Derivatives Association
 
-Contracts are currently in development and should not be used for real value
+**Disclaimer** Contracts are currently in development and should not be used for real value
 
 ## Testing
-```
-truffle compile
-truffle develop
-test
-```
+Once set up using truffle and localhosts, run from each chain:
 
-Further testing runs (with no contract changes) only require `truffle test`.
+```
+truffle test
+```
 
 Should you make any changes to the contract files, make sure you `rm -rf build` before running `truffle compile && truffle test`.
