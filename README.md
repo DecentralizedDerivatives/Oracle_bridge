@@ -126,7 +126,7 @@ Solved by having transerId's, you can query as many times as you want.
 
 All contracts are created by the Decentralized Derivatives Association
 
-**Disclaimer** Contracts are currently in development and should not be used for real value
+**Disclaimer-** Contracts are currently in development and should not be used for real value
 
 ## Testing
 Once set up using truffle and localhosts, run from each chain:
