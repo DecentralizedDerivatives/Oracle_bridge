@@ -1,32 +1,33 @@
-pragma solidity ^0.4.22;
+pragma solidity ^0.4.19;
 import "github.com/oraclize/ethereum-api/oraclizeAPI.sol";
+
 //https://ethereum.stackexchange.com/questions/28641/simplest-way-to-use-a-variable-in-an-oraclize-query?rq=1
 
-contract Bridge{
+contract Bridge is usingOraclize{
 
   /***VARIABLES***/
   string public partnerBridge; //address of bridge contract on other chain
   string public api;
   string public parameters;
-  uint public lastvalue;
+  uint public lastValue;
   bytes4 method_data;
+  event Print(string);
 
 
 
   function Bridge() public {
        method_data = this.retrieveData.selector;
   }
+  //WORKING:
+  /*
+  json(https://ropsten.infura.io/).result
+   {"jsonrpc":"2.0","id":3,"method":"eth_call","params":[{"to":"0x8c9aed038274ecf28a4f435fe731e2ff249166dc","data":"0x5bee29b7000000000000000000000000000000000000000000000000000000005add2200"}, "latest"]}
+*/
 
-    //we need to append address to end of data_string
+//oraclize_query("URL","json(https://ropsten.infura.io/).result",'{"jsonrpc":"2.0","id":3,"method":"eth_call","params":[{"to":"00x8c9aed038274ecf28a4f435fe731e2ff249166dc","data":"0x5bee29b71524441600"}, "latest"]}');
 
-  function checkChild(string _transferId) returns (string){
-          var _parameters  = createQuery_value(_transferId);
-          return _parameters;
-          //oraclize_query("URL","json(https://ropsten.infura.io/).result",'{"jsonrpc":"2.0","id":3,"method":"eth_call","params":[{"to":"0x76a83b371ab7232706eac16edf2b726f3a2dbe82","data":"0xad3b80a8"}, "latest"]}');
-  }
-
-
-//should return 1500
+ {"jsonrpc":"2.0","id":3,"method":"eth_call","params":[{"to":"0x8c9aed038274ecf28a4f435fe731e2ff249166dc","data":"0x5bee29b71524441600"}, "latest"]}
+//should return 1000
 
 //mock bridge - 0x8c9aed038274ecf28a4f435fe731e2ff249166dc
 // (date) 1524441600
@@ -48,7 +49,9 @@ contract Bridge{
   }
 
     //can make internal once it works
-    function createQuery_value(string _id) public returns(string){
+    function createQuery_value(uint _u_id) public returns(string){
+      bytes32 _s_id = toBytes(_u_id);
+      string _id = fromB32(_s_id);
       string memory _code = strConcat(fromCode(method_data),_id);
       string memory params2 = strConcat(api,partnerBridge,"data:",_code,"},latest]}");
       return params2;
@@ -69,6 +72,17 @@ function fromCode(bytes4 code) public view returns (string) {
     result[0] = byte('0');
     result[1] = byte('x');
     for (uint i=0; i<4; ++i) {
+        result[2*i+2] = toHexDigit(uint8(code[i])/16);
+        result[2*i+3] = toHexDigit(uint8(code[i])%16);
+    }
+    return string(result);
+}
+
+function fromB32(bytes32 code) public view returns (string) {                                                                                    
+    bytes memory result = new bytes(10);                                                                                                         
+    result[0] = byte('0');
+    result[1] = byte('x');
+    for (uint i=0; i<32; ++i) {
         result[2*i+2] = toHexDigit(uint8(code[i])/16);
         result[2*i+3] = toHexDigit(uint8(code[i])%16);
     }
@@ -112,17 +126,24 @@ function fund() public payable{
 
     function __callback(bytes32 myid, string result) {
         if (msg.sender != oraclize_cbAddress()) throw;
-        lastValue = uint(result);
-        LogPriceUpdated(result);
-        Print(lastValue);
+        lastValue = parseInt(result);
+        Print(result);
     }
 
     function checkChild(string _query)public {
         if (oraclize_getPrice("URL") > this.balance) {
-            LogNewOraclizeQuery("Oraclize query was NOT sent, please add some ETH to cover for the query fee");
+            Print("Oraclize query was NOT sent, please add some ETH to cover for the query fee");
         } else {
-            LogNewOraclizeQuery("Oraclize query was sent, standing by for the answer..");
+            Print("Oraclize query was sent, standing by for the answer..");
             oraclize_query("URL",_query);
         }
+
+}
+
+function toBytes(uint256 x) returns (bytes b) {
+    b = new bytes(32);
+    assembly { mstore(add(b, 32), x) }
+}
+
 
 }
