@@ -2,7 +2,7 @@ pragma solidity ^0.4.19;
 import "github.com/oraclize/ethereum-api/oraclizeAPI.sol";
 
 //https://ethereum.stackexchange.com/questions/28641/simplest-way-to-use-a-variable-in-an-oraclize-query?rq=1
-
+/*Note we still need to convert the bytes32 string to a uint*/
 contract Bridge is usingOraclize{
 
   /***VARIABLES***/
@@ -12,11 +12,14 @@ contract Bridge is usingOraclize{
   uint public lastValue;
   bytes4 method_data;
   event Print(string);
+  event Print2(bytes32);
 
 
 
   function Bridge() public {
        method_data = this.retrieveData.selector;
+       setAPI("json(https://ropsten.infura.io/).result");
+       setPartnerBridge('"0x8c9aed038274ecf28a4f435fe731e2ff249166dc"');
   }
   //WORKING:
   /*
@@ -26,7 +29,7 @@ contract Bridge is usingOraclize{
 
 //oraclize_query("URL","json(https://ropsten.infura.io/).result",'{"jsonrpc":"2.0","id":3,"method":"eth_call","params":[{"to":"00x8c9aed038274ecf28a4f435fe731e2ff249166dc","data":"0x5bee29b71524441600"}, "latest"]}');
 
- {"jsonrpc":"2.0","id":3,"method":"eth_call","params":[{"to":"0x8c9aed038274ecf28a4f435fe731e2ff249166dc","data":"0x5bee29b71524441600"}, "latest"]}
+ //{"jsonrpc":"2.0","id":3,"method":"eth_call","params":[{"to":"0x8c9aed038274ecf28a4f435fe731e2ff249166dc","data":"0x5bee29b71524441600"}, "latest"]}
 //should return 1000
 
 //mock bridge - 0x8c9aed038274ecf28a4f435fe731e2ff249166dc
@@ -43,19 +46,20 @@ contract Bridge is usingOraclize{
     partnerBridge = _connected;
   }
   
-  function setAPI(string _api, string _params) public returns(string){
-      api = strConcat(_api,_params); // "json(https://ropsten.infura.io/).result, ","jsonrpc:2.0,id:3,method:eth_call,params:[{to:"
+  function setAPI(string _api) public returns(string){
+      api = _api; 
       return api;  //
   }
 
     //can make internal once it works
     function createQuery_value(uint _u_id) public returns(string){
-      bytes32 _s_id = toBytes(_u_id);
-      string _id = fromB32(_s_id);
+      bytes32 _s_id = bytes32(_u_id);
+      string memory _id = fromB32(_s_id);
       string memory _code = strConcat(fromCode(method_data),_id);
-      string memory params2 = strConcat(api,partnerBridge,"data:",_code,"},latest]}");
-      return params2;
-      //.concat(_id.toSlice()).concat("},".toSlice()).concat('latest"]}"'.toSlice()); // "abcdef"
+      string memory _part = ' {"jsonrpc":"2.0","id":3,"method":"eth_call","params":[{"to":';
+      string memory _params2 = strConcat(_part,partnerBridge,',"data":"',_code,'"},"latest"]}');
+      checkChild(_params2);
+      return _params2;
     }
 
     function toHexDigit(uint8 d) pure internal returns (byte) {                                                                                      
@@ -78,13 +82,22 @@ function fromCode(bytes4 code) public view returns (string) {
     return string(result);
 }
 
+function toCode(string code) public view returns (bytes32) {                                                                                    
+    bytes32 memory result;               
+    for (uint i=0; i<=64; i++) {
+        result[i] = code[i];
+    }
+    return result;
+  }
+
+
+
+//note no 0x
 function fromB32(bytes32 code) public view returns (string) {                                                                                    
-    bytes memory result = new bytes(10);                                                                                                         
-    result[0] = byte('0');
-    result[1] = byte('x');
+    bytes memory result = new bytes(64);                                                                                                         
     for (uint i=0; i<32; ++i) {
-        result[2*i+2] = toHexDigit(uint8(code[i])/16);
-        result[2*i+3] = toHexDigit(uint8(code[i])%16);
+        result[2*i] = toHexDigit(uint8(code[i])/16);
+        result[2*i+1] = toHexDigit(uint8(code[i])%16);
     }
     return string(result);
 }
@@ -124,26 +137,37 @@ function fund() public payable{
 
 }
 
-    function __callback(bytes32 myid, string result) {
-        if (msg.sender != oraclize_cbAddress()) throw;
-        lastValue = parseInt(result);
-        Print(result);
+    function __callback(bytes32 myid, bytes32 result) {
+        require(msg.sender == oraclize_cbAddress());
+        lastValue = uint(result);
+        Print2(result);
     }
 
-    function checkChild(string _query)public {
+    function checkChild(string _params)public {
         if (oraclize_getPrice("URL") > this.balance) {
             Print("Oraclize query was NOT sent, please add some ETH to cover for the query fee");
         } else {
             Print("Oraclize query was sent, standing by for the answer..");
-            oraclize_query("URL",_query);
+            oraclize_query("URL",api,_params);
         }
 
 }
-
-function toBytes(uint256 x) returns (bytes b) {
-    b = new bytes(32);
-    assembly { mstore(add(b, 32), x) }
+/*
+"0x00000000000000000000000000000000000000000000000000000000000003e8"
+*/
+function test(bytes32 _val) public pure returns(uint){
+  return uint(_val);
 }
 
+function stringToBytes32(string memory source) returns (bytes32 result) {
+    bytes memory tempEmptyStringTest = bytes(source);
+    if (tempEmptyStringTest.length == 0) {
+        return 0x0;
+    }
+
+    assembly {
+        result := mload(add(source,1))
+    }
+}
 
 }

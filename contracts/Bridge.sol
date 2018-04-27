@@ -117,7 +117,7 @@ contract Bridge is usingOraclize, Wrapped_Token{
       } else {
           LogNewOraclizeQuery("Oraclize query was sent for locked balance");
           var _parameters  = createQuery_value(_transferId);
-          oraclize_query("URL",_parameters);
+          oraclize_query("URL",_api, _parameters);
           //oraclize_query("URL","json(https://ropsten.infura.io/).result",'{"jsonrpc":"2.0","id":3,"method":"eth_call","params":[{"to":"0x76a83b371ab7232706eac16edf2b726f3a2dbe82","data":"0xad3b80a8"}, "latest"]}');
    }
   }
@@ -151,16 +151,50 @@ contract Bridge is usingOraclize, Wrapped_Token{
 
 
   function setPartnerBridge(address _connected) public onlyOwner(){
-    partnerBridge = _connected;
+    partnerBridge = strConccat('"',_connected,'"');
   }
+
+
   function setAPI(string _api, string _params) public onlyOwner(){
-      api = _api; //"json(https://ropsten.infura.io/).result",'{"jsonrpc":"2.0","id":3,"method":"eth_call","params":[{"to":
-      parameters = _params;//"data:"
-  }
+      api = _api; //"json(https://ropsten.infura.io/).result"
+    }
 
     //can make internal once it works
     function createQuery_value(string _id) public constant returns(string){
-      var _params= api.toSlice().concat((partnerBridge.atoString()).toSlice()).concat(parameters.toSlice()).concat(_id.toSlice()).concat("},".toSlice()).concat('latest"]}"'.toSlice()); // "abcdef"
-      return _params;
+      bytes32 _s_id = bytes32(_u_id);
+      string memory _id = fromB32(_s_id);
+      string memory _code = strConcat(fromCode(method_data),_id);
+      string memory _part = ' {"jsonrpc":"2.0","id":3,"method":"eth_call","params":[{"to":';
+      string memory _params2 = strConcat(_part,partnerBridge,',"data":"',_code,'"},"latest"]}');
+      return _params2;
     }
+
+        function strConcat(string _a, string _b, string _c, string _d, string _e) internal returns (string){
+    bytes memory _ba = bytes(_a);
+    bytes memory _bb = bytes(_b);
+    bytes memory _bc = bytes(_c);
+    bytes memory _bd = bytes(_d);
+    bytes memory _be = bytes(_e);
+    string memory abcde = new string(_ba.length + _bb.length + _bc.length + _bd.length + _be.length);
+    bytes memory babcde = bytes(abcde);
+    uint k = 0;
+    for (uint i = 0; i < _ba.length; i++) babcde[k++] = _ba[i];
+    for (i = 0; i < _bb.length; i++) babcde[k++] = _bb[i];
+    for (i = 0; i < _bc.length; i++) babcde[k++] = _bc[i];
+    for (i = 0; i < _bd.length; i++) babcde[k++] = _bd[i];
+    for (i = 0; i < _be.length; i++) babcde[k++] = _be[i];
+    return string(babcde);
+}
+
+function strConcat(string _a, string _b, string _c, string _d) internal returns (string) {
+    return strConcat(_a, _b, _c, _d, "");
+}
+
+function strConcat(string _a, string _b, string _c) internal returns (string) {
+    return strConcat(_a, _b, _c, "", "");
+}
+
+function strConcat(string _a, string _b) internal returns (string) {
+    return strConcat(_a, _b, "", "", "");
+}
 }
