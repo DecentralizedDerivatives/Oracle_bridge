@@ -1,8 +1,5 @@
-var Bridge = artifacts.require("./Bridge.sol");
-var TestContract = artifacts.require("./test_contract.sol")
+var Wrapped_Token = artifacts.require("./Wrapped_Token.sol");
  
 module.exports = function(deployer) {
-  deployer.deploy(Bridge);
-  deployer.deploy(TestContract);
-
+  deployer.deploy(Wrapped_Token);
 };
