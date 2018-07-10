@@ -40,6 +40,102 @@ function substring(string str, uint startIndex, uint endIndex) public constant r
     }
     return string(result);
 }
-  
+
+    //constants for comparison and conversions below
+    byte constant a = byte('a');
+    byte constant f = byte('f');
+    byte constant A = byte('A');
+    byte constant F = byte('F');
+    byte constant zero = byte('0');
+    byte constant nine = byte('9');
+
+    /**
+     * Convert a character to its hex value as a byte. This is NOT
+     * very efficient but is a brute-force way of getting the job done.
+     * It's possible to optimize this with assembly in solidity but
+     * that would require a lot more time.
+     */
+    function hexCharToByte(uint c) pure internal returns(uint) {
+        byte b = byte(c);
+
+        //convert ascii char to hex value
+        if(b >= zero && b <= nine) {
+            return c - uint(zero);
+        } else if(b >= a && b <= f) {
+            return 10 + (c - uint(a));
+        } else if(b >= A && b <= F) {
+            return 10 + (c - uint(A));
+        }
+    }
+
+    /**
+     * Check whether a string has hex prefix.
+     */
+    function hasZeroXPrefix(string s) pure internal returns(bool) {
+        bytes memory b = bytes(s);
+        if(b.length < 2) {
+            return false;
+        }
+        return b[1] == 'x';
+    }
+
+    /**
+     * Convert a hex string to a uint. This is NOT very efficient but
+     * gets the job done. Could probably optimize with assembly but would
+     * require a lot more time.
+     */
+    function hexToUint(string s) pure public returns(uint) {
+        //convert string to bytes
+        bytes memory b = bytes(s);
+
+        //make sure zero-padded
+        require(b.length % 2 == 0, "String must have an even number of characters");
+
+        //starting index to parse from
+        uint i = 0;
+        //strip 0x if present
+        if(hasZeroXPrefix(s)) {
+            i = 2;
+        }
+        uint r = 0;
+        for(;i<b.length;i++) {
+            //convert each ascii char in string to its hex/byte value.
+            uint b1 = hexCharToByte(uint(b[i]));
+
+            //shift over a nibble for each char since hex has 2 chars per byte
+            //OR the result to fill in lower 4 bits with hex byte value.
+            r = (r << 4) | b1;
+        }
+        //result is hex-shifted value of all bytes in input string.
+        return r;
+    }
+
+    /**
+     * Extract a substring from an input string.
+     */
+    function substr(string s, uint start, uint end) pure public returns(string) {
+        require(end > start, "End must be more than start");
+        bytes memory res = new bytes(end-start);
+        bytes memory bts = bytes(s);
+        require(end <= bts.length, "End must be less than or equal to the length of string");
+        require(start >= 0 && start < bts.length, "Start must be between 0 and length of string");
+
+        uint idx = 0;
+        for(uint i=start;i<end;++i) {
+          //just copy bytes over
+            res[idx] = bts[i];
+            ++idx;
+        }
+        return string(res);
+    }
+
+    /**
+     * Parse a hex string into an address.
+     */
+    function parseAddr(string _a) internal pure returns (address){
+        //address is really a uint160...
+        uint iaddr = hexToUint(_a);
+        return address(iaddr);
+    }
 
 }

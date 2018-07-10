@@ -117,9 +117,21 @@ contract Bridge is usingOraclize, Wrapped_Token{
 
   function __callback(bytes32 myid, string result) public {
         require (msg.sender == oraclize_cbAddress());
-        uint _amount= parseInt(substring(result,1,32));
-        address _owner =  parseAddr(substring(result,1,32));
-        uint _transId = parseInt(substring(result,1,32));
+        uint startIdx = 0;
+        if(hasZeroXPrefix(_hexData)) {
+            startIdx = 2;
+        }
+        bytes memory bts = bytes(_hexData);
+        //take the first 64 bytes and convert to uint
+        uint _amount = hexToUint(substr(_hexData, startIdx,64+startIdx));
+        //id is at the end and will be 64 bytes. So grab its starting idx first.
+        uint idStart = bts.length - 64;
+        //the address portion will end where the id starts.
+      uint addrEnd = idStart-1;
+        //parse the last 40 bytes of the address hex.
+      address _owner = parseAddr(substr(_hexData, addrEnd-40, addrEnd));
+        //then extract the id
+      uint _transId = hexToUint(substr(_hexData, idStart, bts.length));
         require(pulledTransaction[_transId] == false);
       balances[_owner] = balances[_owner].add(_amount);
     pulledTransaction[_transId] = true;
