@@ -43,7 +43,7 @@ contract Wrapped_Token{
     && balances[_to] + _amount > balances[_to]) {
       balances[msg.sender] = balances[msg.sender].sub(_amount);
       balances[_to] = balances[_to].add(_amount);
-      Transfer(msg.sender, _to, _amount);
+      emit Transfer(msg.sender, _to, _amount);
       return true;
     } else {
       return false;
@@ -65,7 +65,7 @@ contract Wrapped_Token{
       balances[_from] = balances[_from].sub(_amount);
       allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_amount);
       balances[_to] = balances[_to].add(_amount);
-      Transfer(_from, _to, _amount);
+      emit Transfer(_from, _to, _amount);
       return true;
     } else {
       return false;
@@ -75,7 +75,7 @@ contract Wrapped_Token{
   //Approves a _spender an _amount of tokens to use
   function approve(address _spender, uint _amount) public returns (bool success) {
     allowed[msg.sender][_spender] = _amount;
-    Approval(msg.sender, _spender, _amount);
+    emit Approval(msg.sender, _spender, _amount);
     return true;
   }
 
