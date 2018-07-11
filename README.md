@@ -75,7 +75,7 @@ The basic flow of sending Ether to the other chain (mainchain to dappchain):
 
 ### Functions
 
-##Bridge Contract
+## Bridge Contract
     
     constructor()
 
@@ -99,7 +99,7 @@ The basic flow of sending Ether to the other chain (mainchain to dappchain):
 
     setAPI(string _api, string _params) public onlyOwner()
 
-##DappBridge Contract
+## DappBridge Contract
 
 The DappBridge contract excluded the withdraw function and the checkChild (although it has the same functionallity as the Bridge contract) was renamed to checkMain for clarity. 
 
