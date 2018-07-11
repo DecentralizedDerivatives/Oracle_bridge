@@ -99,7 +99,7 @@ contract DappBridge is usingOraclize, Wrapped_Token{
     /**
     * @dev Checks main chain for Ether is locked for tranfer through their transferId. 
     * @param _id from locked Ether on the main chain. It includes the string
-    * of parameters including the 4-byte code address of the getTransfer fuction on the 
+    * of parameters including the bytes4 code address of the getTransfer fuction on the 
     * mainchain to get the tranfer details (amount, owner, transferId)
     * TO DO: We need to append address to end of data_string
     */

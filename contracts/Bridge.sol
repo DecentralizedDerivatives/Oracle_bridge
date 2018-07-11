@@ -82,7 +82,7 @@ contract Bridge is usingOraclize{
     /**
     * @dev Checks side chain for tokens locked for tranfer through their transferId
     * @param _transferId from locked tokens on the sidechain. It includes the string
-    * of parameters including the 4-byte code address of the DappBridge.getTransfer fuction 
+    * of parameters including the bytes4 code address of the DappBridge.getTransfer fuction 
     * to get the tranfer details (amount, owner, transferId)
     * TO DO: We need to append address to end of data_string
     */

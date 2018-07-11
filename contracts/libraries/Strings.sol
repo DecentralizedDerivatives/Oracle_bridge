@@ -1,47 +1,62 @@
 pragma solidity ^0.4.17;
 
-//Slightly modified SafeMath library - includes a min function
+/**
+* Library with string conversion functions
+*/
 library Strings {
-	  function fromCode(bytes4 code) internal pure returns (string) {                                                                                    
-    bytes memory result = new bytes(10);                                                                                                         
-    result[0] = byte('0');
-    result[1] = byte('x');
-    for (uint i=0; i<4; ++i) {
-        result[2*i+2] = toHexDigit(uint8(code[i])/16);
-        result[2*i+3] = toHexDigit(uint8(code[i])%16);
-    }
-    return string(result);
-}
 
-
-//note no 0x
-function fromB32(bytes32 code) pure internal returns (string) {                                                                                    
-    bytes memory result = new bytes(64);                                                                                                         
-    for (uint i=0; i<32; ++i) {
-        result[2*i] = toHexDigit(uint8(code[i])/16);
-        result[2*i+1] = toHexDigit(uint8(code[i])%16);
+    /**
+    * Converts bytes4 to string
+    */
+	function fromCode(bytes4 code) internal pure returns (string) {                                                                                    
+        bytes memory result = new bytes(10);                                                                                                         
+        result[0] = byte('0');
+        result[1] = byte('x');
+        for (uint i=0; i<4; ++i) {
+            result[2*i+2] = toHexDigit(uint8(code[i])/16);
+            result[2*i+3] = toHexDigit(uint8(code[i])%16);
+        }
+        return string(result);
     }
-    return string(result);
-}
+
+    /**
+    * Convert bytes32 to string without the 0x
+    */
+    function fromB32(bytes32 code) pure internal returns (string) {                                                                                    
+        bytes memory result = new bytes(64);                                                                                                         
+        for (uint i=0; i<32; ++i) {
+            result[2*i] = toHexDigit(uint8(code[i])/16);
+            result[2*i+1] = toHexDigit(uint8(code[i])%16);
+        }
+        return string(result);
+    }
+
+    /**
+    * Convert hex to byte
+    **/
     function toHexDigit(uint8 d) pure internal returns (byte) {                                                                                      
-    if (0 <= d && d <= 9) {                                                                                                                      
-        return byte(uint8(byte('0')) + d);                                                                                                       
-    } else if (10 <= uint8(d) && uint8(d) <= 15) {                                                                                               
-        return byte(uint8(byte('a')) + d - 10);                                                                                                  
-    }                                                                                                                                            
-    revert();                                                                                                                                    
-}
-
-function substring(string str, uint startIndex, uint endIndex) public constant returns (string) {
-    bytes memory strBytes = bytes(str);
-    bytes memory result = new bytes(endIndex-startIndex);
-    for(uint i = startIndex; i < endIndex; i++) {
-        result[i-startIndex] = strBytes[i];
+        if (0 <= d && d <= 9) {                                                                                                                      
+            return byte(uint8(byte('0')) + d);                                                                                                       
+        } else if (10 <= uint8(d) && uint8(d) <= 15) {                                                                                               
+            return byte(uint8(byte('a')) + d - 10);                                                                                                  
+        }                                                                                                                                            
+        revert();                                                                                                                                    
     }
-    return string(result);
-}
+    /**
+    * Converts concatenated string and two uint to string
+    */
+    function substring(string str, uint startIndex, uint endIndex) public constant returns (string) {
+        bytes memory strBytes = bytes(str);
+        bytes memory result = new bytes(endIndex-startIndex);
+        for(uint i = startIndex; i < endIndex; i++) {
+            result[i-startIndex] = strBytes[i];
+        }
+        return string(result);
+    }
 
-    //constants for comparison and conversions below
+    /**
+    * constants for comparison and conversions below
+    */
     byte constant a = byte('a');
     byte constant f = byte('f');
     byte constant A = byte('A');
@@ -50,11 +65,11 @@ function substring(string str, uint startIndex, uint endIndex) public constant r
     byte constant nine = byte('9');
 
     /**
-     * Convert a character to its hex value as a byte. This is NOT
-     * very efficient but is a brute-force way of getting the job done.
-     * It's possible to optimize this with assembly in solidity but
-     * that would require a lot more time.
-     */
+    * Convert a character to its hex value as a byte. This is NOT
+    * very efficient but is a brute-force way of getting the job done.
+    * It's possible to optimize this with assembly in solidity but
+    * that would require a lot more time.
+    */
     function hexCharToByte(uint c) pure internal returns(uint) {
         byte b = byte(c);
 
@@ -69,8 +84,8 @@ function substring(string str, uint startIndex, uint endIndex) public constant r
     }
 
     /**
-     * Check whether a string has hex prefix.
-     */
+    * Check whether a string has hex prefix.
+    */
     function hasZeroXPrefix(string s) pure internal returns(bool) {
         bytes memory b = bytes(s);
         if(b.length < 2) {
@@ -111,8 +126,8 @@ function substring(string str, uint startIndex, uint endIndex) public constant r
     }
 
     /**
-     * Extract a substring from an input string.
-     */
+    * Extract a substring from an input string.
+    */
     function substr(string s, uint start, uint end) pure public returns(string) {
         require(end > start, "End must be more than start");
         bytes memory res = new bytes(end-start);
@@ -130,8 +145,8 @@ function substring(string str, uint startIndex, uint endIndex) public constant r
     }
 
     /**
-     * Parse a hex string into an address.
-     */
+    * Parse a hex string into an address.
+    */
     function parseAddr(string _a) internal pure returns (address){
         //address is really a uint160...
         uint iaddr = hexToUint(_a);
