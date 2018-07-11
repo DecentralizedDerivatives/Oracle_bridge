@@ -15,25 +15,20 @@ The code allows for parties to lock Ether (and eventually tokens) on another EVM
 * DappBridge.sol - Sidechain bridge contract linked to the mainnet via API and Bridge.sol contract address.
 * Wrapped_Token - contains the ERC20 functions needed to wrap ETH into an ERC20 token.  
 * String.sol - is a library called by both bridge contracts to help convert different output or input to strings. 
+* Note: Both bridge contracts use Oraclize.
 
-Both bridge contracts use Oraclize.
-
-### The Bridge Contracts
-
-Only two contracts are necessary for the bridge contract to be active on a chain: the Oraclize contract and the Bridge Contract or the DappBridge Contract.  Oraclize contracts are deployed already on mainnet and the main testnets on Ethereum and the Ethereum Bridge library makes the deployment very simple on your own chain.  
-
-The bridge contracts are two fold: a token contract and a bridge contract.  
+Only two contracts are necessary for the bridge contract to be active on a chain: the Oraclize contract and the Bridge Contract.  Oraclize contracts are deployed already on mainnet and the main testnets on Ethereum and the Ethereum Bridge library makes the deployment very simple on your own chain/sidechain. The sidechain bridge contract is a two fold contract (a token contract and a bridge contract that also utilizes Oraclize.
 
 The basic flow of sending Ether to the other chain (mainchain to dappchain):
 
-    On mainchain:
-        *Party deposits and locks Ether into Bridge contract
-            *This creates a 'transferId' which is mapped to the amount and the owner
-    On the dappchain:
-        *Party uses the 'transferId' to query (via Oraclize) the mainchain for the amount locked and the owner
-        *If the returned owner is that party, they are issued tokens that represent that amount and the transferId is marked as complete
+On mainchain:
+    * Party deposits and locks Ether into Bridge contract
+        * This creates a 'transferId' which is mapped to the amount and the owner
+On the dappchain:
+    * Party uses the 'transferId' to query (via Oraclize) the mainchain for the amount locked and the owner
+    * If the returned owner is that party, they are issued tokens that represent that amount and the transferId is marked as complete
 
-    To withdraw from the dappchain, the functionality is identical only the role of Ether and the dappchain tokens are reversed.
+To withdraw from the dappchain, the functionality is identical only the role of Ether and the dappchain tokens are reversed.
 
 
 ## Setup
@@ -110,7 +105,7 @@ The basic flow of sending Ether to the other chain (mainchain to dappchain):
 
 #### DappBridge Contract
 
-The DappBridge contract excludes the withdraw function,the checkChild (although it has the same functionallity as the Bridge contract) was renamed to checkMain for clarity and the checkMain is not payable and requires an amount to lock. 
+The DappBridge contract excludes the withdraw function, the checkChild (although it has the same functionallity as the Bridge contract) was renamed to checkMain for clarity and the checkMain is not payable and requires an amount to lock. 
 
     constructor()
 
