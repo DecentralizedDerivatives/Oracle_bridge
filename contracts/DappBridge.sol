@@ -23,7 +23,7 @@ contract DappBridge is usingOraclize, Wrapped_Token{
 
     using SafeMath for uint256;
 
-    /***VARIABLES***/
+    /***Variables***/
     string public bridgedChain;
     uint public total_deposited_supply;
     uint public total_locked;
@@ -39,25 +39,26 @@ contract DappBridge is usingOraclize, Wrapped_Token{
         address owner;
         uint transferId;
     }
-    /***STORAGE***/
+    
+    /***Storage**/
     mapping(address => uint) deposited_balances;
     mapping(uint => Details) transferDetails; //maps a transferId to an amount
     mapping(address => uint[]) transferList; //list of all transfers from an address;
     mapping(uint => bool) pulledTransaction;
 
-    /***EVENTS***/
+    /***Events***/
     event Locked(address _from, uint _value);
     event LogUpdated(string value);
     event LogNewOraclizeQuery(string description);
 
-    /***FUNCTIONS***/
+    /***Functions***/
     constructor() public  {
         //enter your custom OAR here:
         OAR = OraclizeAddrResolverI(0x6f485C8BF6fc43eA212E93BBF8ce046C7f1cb475);
         owner = msg.sender;
     }
  
-    /***MODIFIERS***/
+    /***Modifiers***/
     /** 
     * @dev Access modifier for Owner functionality
     */
@@ -67,8 +68,8 @@ contract DappBridge is usingOraclize, Wrapped_Token{
     }
 
     /**
-    *@dev Allows the owner to set a new owner address
-    *@param _owner the new owner address
+    * @dev Allows the owner to set a new owner address
+    * @param _owner the new owner address
     */
     function setOwner (address _owner) public onlyOwner(){
         owner = _owner;

@@ -227,6 +227,10 @@ contract DappBridge is usingOraclize, Wrapped_Token{
         _;
     }
 
+    /**
+    *@dev Allows the owner to set a new owner address
+    *@param _owner the new owner address
+    */
     function setOwner (address _owner) public onlyOwner(){
         owner = _owner;
     }

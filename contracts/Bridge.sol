@@ -9,7 +9,7 @@ contract Bridge is usingOraclize{
 
     using SafeMath for uint256;
 
-    /***VARIABLES***/
+    /***Variables***/
     string public bridgedChain;
     uint public total_deposited_supply;
     uint public total_locked;
@@ -25,24 +25,25 @@ contract Bridge is usingOraclize{
         address owner;
         uint transferId;
     }
-    /***STORAGE***/
+    
+    /***Storage***/
     mapping(address => uint) deposited_balances;
     mapping(uint => Details) transferDetails; //maps a transferId to an amount
     mapping(address => uint[]) transferList; //list of all transfers from an address;
     mapping(uint => bool) pulledTransaction;
 
-    /***EVENTS***/
+    /***Events***/
     event Locked(address _from, uint _value);
     event LogUpdated(string value);
     event LogNewOraclizeQuery(string description);
     event Print(string _string);
 
-    /***FUNCTIONS***/
+    /***Functions***/
     constructor() public {
         owner = msg.sender;
     }
  
-    /***MODIFIERS***/
+    /***Modifiers***/
     /** 
     * @dev Access modifier for Owner functionality
     */
@@ -52,8 +53,8 @@ contract Bridge is usingOraclize{
     }
 
     /**
-    *@dev Allows the owner to set a new owner address
-    *@param _owner the new owner address
+    * @dev Allows the owner to set a new owner address
+    * @param _owner the new owner address
     */
     function setOwner (address _owner) public onlyOwner(){
         owner = _owner;
