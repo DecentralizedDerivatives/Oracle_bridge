@@ -82,7 +82,7 @@ The basic flow of sending Ether to the other chain (mainchain to dappchain):
 
 #### Basic Functions Flow to Transfer from Mainnet to Sidechain
 
-![MainToSideChain](./public/MainToSideChain.jpg)
+![MainToSideChain](./public/MainToSideChain.png)
 
 #### Bridge Contract
     
