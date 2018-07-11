@@ -1,7 +1,7 @@
 var HDWalletProvider = require("truffle-hdwallet-provider");
 
 var mnemonic = "other tray hint valid buyer fiscal patch fly damp ocean produce wish";
-0xe5078b80b08bd7036fc0f7973f667b6aa9b4ddbe
+//0xe5078b80b08bd7036fc0f7973f667b6aa9b4ddbe
 
 module.exports = {
   networks: {
