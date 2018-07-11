@@ -22,11 +22,11 @@ Only two contracts are necessary for the bridge contract to be active on a chain
 The basic flow of sending Ether to the other chain (mainchain to dappchain):
 
 On mainchain:
-    * Party deposits and locks Ether into Bridge contract
+  * Party deposits and locks Ether into Bridge contract
         * This creates a 'transferId' which is mapped to the amount and the owner
 On the dappchain:
-    * Party uses the 'transferId' to query (via Oraclize) the mainchain for the amount locked and the owner
-    * If the returned owner is that party, they are issued tokens that represent that amount and the transferId is marked as complete
+  * Party uses the 'transferId' to query (via Oraclize) the mainchain for the amount locked and the owner
+  * If the returned owner is that party, they are issued tokens that represent that amount and the transferId is marked as complete
 
 To withdraw from the dappchain, the functionality is identical only the role of Ether and the dappchain tokens are reversed.
 
