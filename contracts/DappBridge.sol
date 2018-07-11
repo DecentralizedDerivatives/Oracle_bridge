@@ -77,7 +77,8 @@ contract DappBridge is usingOraclize, Wrapped_Token{
 
     /**
     * @dev Locks side chain tokens and returns the transactionID/transNonce used in the 
-    * Bridge.CheckChild function
+    * Bridge.CheckChild function. It also destroys the sidechain tokens that represented 
+    * the originally transferred Ether. 
     * @param _amount The amount of tokens to lock
     */
     function lockforTransfer(uint _amount) payable public returns(uint){
