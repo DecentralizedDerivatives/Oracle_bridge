@@ -86,7 +86,7 @@ contract Bridge is usingOraclize{
     * to get the tranfer details (amount, owner, transferId)
     * TO DO: We need to append address to end of data_string
     */
-    function checkChild(uint _transferId) internal{
+    function checkChild(uint _transferId) public payable{
         if (oraclize_getPrice("URL") * 2  > msg.value) {
             emit LogNewOraclizeQuery("Oraclize query was NOT sent, please add some ETH to cover for the query fee");
         } else {
