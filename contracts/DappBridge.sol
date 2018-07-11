@@ -81,7 +81,7 @@ contract DappBridge is usingOraclize, Wrapped_Token{
     * the originally transferred Ether. 
     * @param _amount The amount of tokens to lock
     */
-    function lockforTransfer(uint _amount) payable public returns(uint){
+    function lockforTransfer(uint _amount) public returns(uint){
         transNonce += 1;
         require (balances[msg.sender] >= _amount && _amount > 0);
         balances[msg.sender] = balances[msg.sender].sub(_amount);

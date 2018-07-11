@@ -10,30 +10,35 @@ The code allows for parties to lock Ether (and eventually tokens) on another EVM
 
 
 ## Contracts
-	
-### The Bridge Contract
 
-Only two contracts are necessary for the bridge contract to be active on a chain: the Oraclize contract and the Bridge Contract.  Oraclize contracts are deployed already on mainnet and the main testnets on Ethereum and the Ethereum Bridge library makes the deployment very simple on your own chain.  
+* Bridge.sol-Mainnet bridge contract linked to the sidechain via API and DappBridge.sol contract address.
+* DappBridge.sol-Sidechain bridge contract linked to the mainnet via API and Bridge.sol contract address.
+* Wrapped_Token- contains the ERC20 functions needed to wrap ETH into an ERC20 token.  
+* String.sol - is a library called by both bridge contracts to help convert different output or input to strings. 
 
-The Bridge contract is a two fold: a token contract and a bridge contract.  
+Both bridge contracts use Oraclize.
+
+### The Bridge Contracts
+
+Only two contracts are necessary for the bridge contract to be active on a chain: the Oraclize contract and the Bridge Contract or the DappBridge Contract.  Oraclize contracts are deployed already on mainnet and the main testnets on Ethereum and the Ethereum Bridge library makes the deployment very simple on your own chain.  
+
+The bridge contracts are two fold: a token contract and a bridge contract.  
 
 The basic flow of sending Ether to the other chain (mainchain to dappchain):
 
     On mainchain:
-         Party deposits and locks Ether into Bridge contract
-            This creates a 'transferId' which is mapped to the amount and the owner
+        *Party deposits and locks Ether into Bridge contract
+            *This creates a 'transferId' which is mapped to the amount and the owner
     On the dappchain:
-        Party uses the 'transferId' to query (via Oraclize) the mainchain for the amount locked and the owner
-        If the returned owner is that party, they are issued tokens that represent that amount and the transferId is marked as complete
+        *Party uses the 'transferId' to query (via Oraclize) the mainchain for the amount locked and the owner
+        *If the returned owner is that party, they are issued tokens that represent that amount and the transferId is marked as complete
 
     To withdraw from the dappchain, the functionality is identical only the role of Ether and the dappchain tokens are reversed.
 
 
-
-
 ## Setup
 
-    Download Ethereum Bridge:  https://github.com/oraclize/ethereum-bridge 
+  Download Ethereum Bridge:  https://github.com/oraclize/ethereum-bridge 
 
 	Start the 'mainchain'
 	Open Ethereum Bridge on mainchain
@@ -75,14 +80,18 @@ The basic flow of sending Ether to the other chain (mainchain to dappchain):
 
 ### Functions
 
-## Bridge Contract
+#### Basic Functions Flow to Transfer from Mainnet to Sidechain
+
+![Bridge Functions Flow Mainnet to Sidechain](./public/MainToSideChain.jpg)
+
+#### Bridge Contract
     
     constructor()
 
     setOwner (address _owner) public onlyOwner()
 
-    lockforTransfer(uint _amount, bool _eth) payable public returns(uint)
-
+    lockforTransfer() payable public returns(uint) 
+  
     checkChild(string _transferId) public payable
 
         getTransfer(uint _transferId) public returns(uint,address,uint)
@@ -99,9 +108,31 @@ The basic flow of sending Ether to the other chain (mainchain to dappchain):
 
     setAPI(string _api, string _params) public onlyOwner()
 
-## DappBridge Contract
+#### DappBridge Contract
 
-The DappBridge contract excluded the withdraw function and the checkChild (although it has the same functionallity as the Bridge contract) was renamed to checkMain for clarity. 
+The DappBridge contract excludes the withdraw function,the checkChild (although it has the same functionallity as the Bridge contract) was renamed to checkMain for clarity and the checkMain is not payable and requires an amount to lock. 
+
+    constructor()
+
+    setOwner (address _owner) public onlyOwner()
+
+    lockforTransfer(uint _amount) public returns(uint)
+  
+    checkChild(string _transferId) public payable
+
+        getTransfer(uint _transferId) public returns(uint,address,uint)
+
+        createQuery_value(string _id) public constant returns(string)
+
+    __callback(bytes32 myid, string result) public 
+
+    depositedBalanceOf(address _owner) public constant returns (uint)
+
+    setPartnerBridge(address _connected) public onlyOwner()
+
+    setAPI(string _api, string _params) public onlyOwner()
+
+
 
 ### Centralization and other concerns
 
