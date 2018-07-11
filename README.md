@@ -11,9 +11,9 @@ The code allows for parties to lock Ether (and eventually tokens) on another EVM
 
 ## Contracts
 
-* Bridge.sol-Mainnet bridge contract linked to the sidechain via API and DappBridge.sol contract address.
-* DappBridge.sol-Sidechain bridge contract linked to the mainnet via API and Bridge.sol contract address.
-* Wrapped_Token- contains the ERC20 functions needed to wrap ETH into an ERC20 token.  
+* Bridge.sol - mainnet bridge contract linked to the sidechain via API and DappBridge.sol contract address.
+* DappBridge.sol - Sidechain bridge contract linked to the mainnet via API and Bridge.sol contract address.
+* Wrapped_Token - contains the ERC20 functions needed to wrap ETH into an ERC20 token.  
 * String.sol - is a library called by both bridge contracts to help convert different output or input to strings. 
 
 Both bridge contracts use Oraclize.
