@@ -2,9 +2,10 @@ pragma solidity ^0.4.17;
 
 import "./libraries/SafeMath.sol";
 
-
-//This is the basic wrapped Ether contract. 
-//All money deposited is transformed into ERC20 tokens at the rate of 1 wei = 1 token
+/**
+* This is the basic wrapped Ether contract. 
+* All money deposited is transformed into ERC20 tokens at the rate of 1 wei = 1 token
+*/
 contract Wrapped_Token{
 
   using SafeMath for uint256;
@@ -29,13 +30,14 @@ contract Wrapped_Token{
   /*Functions*/
 
   //Returns the balance associated with the passed in _owner
-  function balanceOf(address _owner) public constant returns (uint bal) { return balances[_owner]; }
+  function balanceOf(address _owner) public constant returns (uint bal) { 
+    return balances[_owner]; 
+  }
 
   /*
-  * Allows for a transfer of tokens to _to
-  *
-  * @param "_to": The address to send tokens to
-  * @param "_amount": The amount of tokens to send
+  * @dev Allows for a transfer of tokens to _to
+  * @param _to The address to send tokens to
+  * @param _amount The amount of tokens to send
   */
   function transfer(address _to, uint _amount) public returns (bool success) {
     if (balances[msg.sender] >= _amount
@@ -53,9 +55,9 @@ contract Wrapped_Token{
   /*
   * Allows an address with sufficient spending allowance to send tokens on the behalf of _from
   *
-  * @param "_from": The address to send tokens from
-  * @param "_to": The address to send tokens to
-  * @param "_amount": The amount of tokens to send
+  * @param _from The address to send tokens from
+  * @param _to The address to send tokens to
+  * @param _amount The amount of tokens to send
   */
   function transferFrom(address _from, address _to, uint _amount) public returns (bool success) {
     if (balances[_from] >= _amount
