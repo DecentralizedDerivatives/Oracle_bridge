@@ -1,5 +1,5 @@
 {
-  "name": "drct_standard",
+  "name": "oracle_bridge",
   "version": "1.0.0",
   "description": "Bridge contract",
   "main": "truffle-config.js",
@@ -19,12 +19,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/DecentralizedDerivatives/DRCT_standard.git"
+    "url": "git+https://github.com/DecentralizedDerivatives/Oracle_bridge.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/DecentralizedDerivatives/DRCT_standard/issues"
+    "url": "https://github.com/DecentralizedDerivatives/Oracle_bridge/issues"
   },
-  "homepage": "https://github.com/DecentralizedDerivatives/DRCT_standard#readme"
+  "homepage": "https://github.com/DecentralizedDerivatives/Oracle_bridge#readme"
 }
