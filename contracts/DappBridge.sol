@@ -3,7 +3,7 @@ pragma solidity ^0.4.21;
 import "./libraries/SafeMath.sol";
 import "./Oraclize/Oraclize_API.sol";
 import "./Wrapped_Token.sol";
-import "./libaries/Strings.sol";
+import "./libraries/Strings.sol";
 
 
 /**
@@ -109,7 +109,7 @@ contract DappBridge is usingOraclize, Wrapped_Token{
         } else {
             emit LogNewOraclizeQuery("Oraclize query was sent for locked balance");
             string memory _params  = createQuery_value(_id);
-            bytes32 queryId = oraclize_query("URL",api,_params);
+            oraclize_query("URL",api,_params);
        }
     }
 
@@ -117,7 +117,7 @@ contract DappBridge is usingOraclize, Wrapped_Token{
     * @dev This function is called from the main chain through its 4-byte code 
     * address through the oraclize function within the CheckChild function in the main chain
     */
-    function getTransfer(uint _transferId) public returns(uint,address,uint){
+    function getTransfer(uint _transferId) public view returns(uint,address,uint){
         Details memory _locked = transferDetails[_transferId];
         return(_locked.amount,_locked.owner,_locked.transferId);
     }
@@ -147,9 +147,25 @@ contract DappBridge is usingOraclize, Wrapped_Token{
     */
     function __callback(bytes32 myid, string result) public {
         require (msg.sender == oraclize_cbAddress());
-        uint _amount= parseInt(Strings.substring(result,1,32));
-        address _owner =  parseAddr(Strings.substring(result,1,32));
-        uint _transId = parseInt(Strings.substring(result,1,32));
+        uint startIdx = 0;
+        if(Strings.hasZeroXPrefix(result)) {
+            startIdx = 2;
+        }
+        bytes memory bts = bytes(result);
+        //take the first 64 bytes and convert to uint
+        uint _amount = Strings.hexToUint(Strings.substr(result, startIdx,64+startIdx));
+
+        //id is at the end and will be 64 bytes. So grab its starting idx first.
+        uint idStart = bts.length - 64;
+
+        //the address portion will end where the id starts.
+        uint addrEnd = idStart-1;
+
+        //parse the last 40 bytes of the address hex.
+        address _owner = Strings.parseAddr(Strings.substr(result, addrEnd-40, addrEnd));
+
+        //then extract the id
+        uint _transId = Strings.hexToUint(Strings.substr(result, idStart, bts.length));
         require(pulledTransaction[_transId] == false);
         balances[_owner] = balances[_owner].add(_amount);
         pulledTransaction[_transId] = true;

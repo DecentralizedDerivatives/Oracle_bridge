@@ -1,6 +1,8 @@
 pragma solidity ^0.4.21;
 
-import "oraclize-api/usingOraclize.sol";
+import "./libraries/SafeMath.sol";
+import "./Oraclize/Oraclize_API.sol";
+import "./libraries/Strings.sol";
 /**
 *Main chain bridge contract
 */
@@ -36,7 +38,6 @@ contract Bridge is usingOraclize{
     event Locked(address _from, uint _value);
     event LogUpdated(string value);
     event LogNewOraclizeQuery(string description);
-    event Print(string _string);
 
     /***Functions***/
     constructor() public {
@@ -93,8 +94,6 @@ contract Bridge is usingOraclize{
             emit LogNewOraclizeQuery("Oraclize query was sent for locked balance");
             string memory _parameters  = createQuery_value(_transferId);
             oraclize_query("URL",api, _parameters);
-            Print(api);
-            Print(_parameters);
             //oraclize_query("URL","json(https://ropsten.infura.io/).result",'{"jsonrpc":"2.0","id":3,"method":"eth_call","params":[{"to":"0x76a83b371ab7232706eac16edf2b726f3a2dbe82","data":"0xad3b80a8"}, "latest"]}');
         }
     }
@@ -103,7 +102,7 @@ contract Bridge is usingOraclize{
     * @dev This function is called from the side chain through its 4-byte code 
     * address through the oraclize function within the CheckChild function in the side chain
     */
-    function getTransfer(uint _transferId) public returns(uint,address,uint){
+    function getTransfer(uint _transferId) public view returns(uint,address,uint){
         Details memory _locked = transferDetails[_transferId];
         return(_locked.amount,_locked.owner,_locked.transferId);
     }
@@ -132,16 +131,31 @@ contract Bridge is usingOraclize{
     */
     function __callback(bytes32 myid, string result) public {
         require (msg.sender == oraclize_cbAddress());
-        uint _amount= parseInt(Strings.substring(result,1,32));
-        address _owner =  parseAddr(Strings.substring(result,1,32));
-        uint _transId = parseInt(Strings.substring(result,1,32));
+        uint startIdx = 0;
+        if(Strings.hasZeroXPrefix(result)) {
+            startIdx = 2;
+        }
+        bytes memory bts = bytes(result);
+        //take the first 64 bytes and convert to uint
+         uint _amount = Strings.hexToUint(Strings.substr(result, startIdx,64+startIdx));
+
+        //id is at the end and will be 64 bytes. So grab its starting idx first.
+        uint idStart = bts.length - 64;
+
+        //the address portion will end where the id starts.
+        uint addrEnd = idStart-1;
+
+        //parse the last 40 bytes of the address hex.
+        address _owner = Strings.parseAddr(Strings.substr(result, addrEnd-40, addrEnd));
+
+        //then extract the id
+        uint _transId = Strings.hexToUint(Strings.substr(result, idStart, bts.length));
         require(pulledTransaction[_transId] == false);
         deposited_balances[_owner] = deposited_balances[_owner].add(_amount);
         total_deposited_supply = total_deposited_supply.add(_amount);
         pulledTransaction[_transId] = true;
         emit LogUpdated(result);
     }
-
 
     /**
     * @dev This function 'unwraps' an _amount of Ether in the sender's balance by 

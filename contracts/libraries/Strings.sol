@@ -45,7 +45,7 @@ library Strings {
     /**
     * Converts concatenated string and two uint to string
     */
-    function substring(string str, uint startIndex, uint endIndex) public constant returns (string) {
+    function substring(string str, uint startIndex, uint endIndex) internal pure returns (string) {
         bytes memory strBytes = bytes(str);
         bytes memory result = new bytes(endIndex-startIndex);
         for(uint i = startIndex; i < endIndex; i++) {
@@ -99,7 +99,7 @@ library Strings {
      * gets the job done. Could probably optimize with assembly but would
      * require a lot more time.
      */
-    function hexToUint(string s) pure public returns(uint) {
+    function hexToUint(string s) pure internal returns(uint) {
         //convert string to bytes
         bytes memory b = bytes(s);
 
@@ -128,7 +128,7 @@ library Strings {
     /**
     * Extract a substring from an input string.
     */
-    function substr(string s, uint start, uint end) pure public returns(string) {
+    function substr(string s, uint start, uint end) internal pure returns(string) {
         require(end > start, "End must be more than start");
         bytes memory res = new bytes(end-start);
         bytes memory bts = bytes(s);
@@ -152,5 +152,7 @@ library Strings {
         uint iaddr = hexToUint(_a);
         return address(iaddr);
     }
+
+
 
 }
