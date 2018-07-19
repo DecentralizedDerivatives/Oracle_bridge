@@ -35,7 +35,7 @@ contract Bridge is usingOraclize{
     mapping(uint => bool) pulledTransaction;
 
     /***Events***/
-    event Locked(address _from, uint _value);
+    event Locked(uint _id,address _from, uint _value);
     event LogUpdated(string value);
     event LogNewOraclizeQuery(string description);
 
@@ -61,6 +61,11 @@ contract Bridge is usingOraclize{
         owner = _owner;
     }
 
+    //enter your custom OAR here:
+    function setOAR(address _oar) public onlyOwner() {
+        OAR = OraclizeAddrResolverI(_oar);
+    }
+
     /**
     * @dev Allows for a transfer of tokens to sender once locked
     * The addressDetails memory _locked = transferDetails[_transferId];ss to send tokens to
@@ -69,7 +74,6 @@ contract Bridge is usingOraclize{
     function lockforTransfer() payable public returns(uint){
         require(msg.value > 0);
         total_locked = total_locked.add(msg.value);
-        emit Locked(msg.sender,msg.value);
         transNonce += 1;
         transferDetails[transNonce] = Details({
             amount:msg.value,
@@ -77,6 +81,7 @@ contract Bridge is usingOraclize{
             transferId:transNonce
         });
         transferList[msg.sender].push(transNonce);
+        emit Locked(transNonce,msg.sender,msg.value);
         return(transNonce);
     }
 
@@ -160,13 +165,11 @@ contract Bridge is usingOraclize{
     /**
     * @dev This function 'unwraps' an _amount of Ether in the sender's balance by 
     * transferring Ether to them
-    * @param _value The amount of the token to unwrap
     */
-    function withdraw(uint _value) public {
-        require(deposited_balances[msg.sender] >= _value);
-        deposited_balances[msg.sender] = deposited_balances[msg.sender].sub(_value);
-        total_deposited_supply = total_deposited_supply.sub(_value);
-        msg.sender.transfer(_value);
+    function withdraw() public {
+        require(deposited_balances[msg.sender] >= 0);
+        total_deposited_supply = total_deposited_supply.sub(deposited_balances[msg.sender]);
+        msg.sender.transfer(deposited_balances[msg.sender]);
     }
 
     /**

@@ -41,21 +41,23 @@ contract DappBridge is usingOraclize, Wrapped_Token{
     }
     
     /***Storage**/
-    mapping(address => uint) deposited_balances;
     mapping(uint => Details) transferDetails; //maps a transferId to an amount
     mapping(address => uint[]) transferList; //list of all transfers from an address;
     mapping(uint => bool) pulledTransaction;
 
     /***Events***/
-    event Locked(address _from, uint _value);
+    event Locked(uint _id,address _from, uint _value);
     event LogUpdated(string value);
     event LogNewOraclizeQuery(string description);
 
     /***Functions***/
     constructor() public  {
-        //enter your custom OAR here:
-        OAR = OraclizeAddrResolverI(0x6f485C8BF6fc43eA212E93BBF8ce046C7f1cb475);
         owner = msg.sender;
+    }
+    
+    //enter your custom OAR here:
+    function setOAR(address _oar) public onlyOwner() {
+        OAR = OraclizeAddrResolverI(_oar);
     }
  
     /***Modifiers***/
@@ -86,13 +88,13 @@ contract DappBridge is usingOraclize, Wrapped_Token{
         require (balances[msg.sender] >= _amount && _amount > 0);
         balances[msg.sender] = balances[msg.sender].sub(_amount);
         total_supply = total_supply.sub(_amount);
-        emit Locked(msg.sender,_amount);
         transferDetails[transNonce] = Details({
             amount:_amount,
             owner:msg.sender,
             transferId:transNonce
         });
        transferList[msg.sender].push(transNonce);
+               emit Locked(transNonce,msg.sender,_amount);
        return(transNonce);
     }
 
@@ -171,15 +173,6 @@ contract DappBridge is usingOraclize, Wrapped_Token{
         pulledTransaction[_transId] = true;
         emit LogUpdated(result);
     }    
-
-    /**
-    * @dev Returns the balance associated with the passed in _owner
-    * @param _owner address
-    * @return balance of owner specified
-    */
-    function depositedBalanceOf(address _owner) public constant returns (uint) { 
-        return deposited_balances[_owner]; 
-    }
 
     /**
     * @dev Set partner bridge contract address from the main chain
