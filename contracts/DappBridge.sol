@@ -25,8 +25,6 @@ contract DappBridge is usingOraclize, Wrapped_Token{
 
     /***Variables***/
     string public bridgedChain;
-    uint public total_deposited_supply;
-    uint public total_locked;
     uint transNonce;
     string public partnerBridge; //address of bridge contract on other chain
     string api;
@@ -83,7 +81,7 @@ contract DappBridge is usingOraclize, Wrapped_Token{
     * the originally transferred Ether. 
     * @param _amount The amount of tokens to lock
     */
-    function lockforTransfer(uint _amount) public returns(uint){
+    function lockForTransfer(uint _amount) public returns(uint){
         transNonce += 1;
         require (balances[msg.sender] >= _amount && _amount > 0);
         balances[msg.sender] = balances[msg.sender].sub(_amount);
@@ -111,7 +109,7 @@ contract DappBridge is usingOraclize, Wrapped_Token{
         } else {
             emit LogNewOraclizeQuery("Oraclize query was sent for locked balance");
             string memory _params  = createQuery_value(_id);
-            oraclize_query("URL",api,_params);
+            oraclize_query("URL",api,_params, 3000000);
        }
     }
 
@@ -135,10 +133,10 @@ contract DappBridge is usingOraclize, Wrapped_Token{
         bytes32 _s_id = bytes32(u_id);
         string memory _id = Strings.fromB32(_s_id);
         string memory _code = strConcat(partnerBridge,',"data":"',Strings.fromCode(method_data),_id,'"},"latest"]}');
-        string memory _params2 = strConcat(' {"jsonrpc":"2.0","id":3,"method":"eth_call","params":[{"to":',_code);
+        string memory _params2 = strConcat(' {"jsonrpc":"2.0","id":60,"method":"eth_call","params":[{"to":',_code);
         return _params2;
     }
-
+        event Print(uint _amount,address _owner,uint _id);
     /**
     * @dev Gets the oraclize query results as as string, parses the string to
     * get the amount, owner, transferID, updates the owner's/sender side chain 
@@ -147,7 +145,7 @@ contract DappBridge is usingOraclize, Wrapped_Token{
     * @param result is a string of the amount, owner, and transferId from the 
     * Bridge.getTransfer function
     */
-    function __callback(bytes32 myid, string result) public {
+    function __callback(bytes32 myid, string result) public{
         require (msg.sender == oraclize_cbAddress());
         uint startIdx = 0;
         if(Strings.hasZeroXPrefix(result)) {
@@ -156,21 +154,19 @@ contract DappBridge is usingOraclize, Wrapped_Token{
         bytes memory bts = bytes(result);
         //take the first 64 bytes and convert to uint
         uint _amount = Strings.hexToUint(Strings.substr(result, startIdx,64+startIdx));
-
         //id is at the end and will be 64 bytes. So grab its starting idx first.
         uint idStart = bts.length - 64;
-
         //the address portion will end where the id starts.
-        uint addrEnd = idStart-1;
-
+        uint addrEnd = idStart;
         //parse the last 40 bytes of the address hex.
         address _owner = Strings.parseAddr(Strings.substr(result, addrEnd-40, addrEnd));
-
         //then extract the id
         uint _transId = Strings.hexToUint(Strings.substr(result, idStart, bts.length));
         require(pulledTransaction[_transId] == false);
         balances[_owner] = balances[_owner].add(_amount);
+        total_supply = total_supply.add(_amount);
         pulledTransaction[_transId] = true;
+        emit Print(_amount,_owner,_transId);
         emit LogUpdated(result);
     }    
 

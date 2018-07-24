@@ -24,13 +24,14 @@ contract Wrapped_Token{
   event Transfer(address indexed _from, address indexed _to, uint _value);
   event Approval(address indexed _owner, address indexed _spender, uint _value);
 
-
+event Print(uint);
   /*Functions*/
     /**
     *@param _owner is the owner address used to look up the balance
     *@return Returns the balance associated with the passed in _owner
     */
     function balanceOf(address _owner) public constant returns (uint bal) { 
+        emit Print(balances[_owner]);
         return balances[_owner]; 
     }
 

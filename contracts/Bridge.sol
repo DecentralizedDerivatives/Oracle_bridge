@@ -71,7 +71,7 @@ contract Bridge is usingOraclize{
     * The addressDetails memory _locked = transferDetails[_transferId];ss to send tokens to
     * The amount of tokens to send
     */
-    function lockforTransfer() payable public returns(uint){
+    function lockForTransfer() payable public returns(uint){
         require(msg.value > 0);
         total_locked = total_locked.add(msg.value);
         transNonce += 1;
@@ -98,7 +98,7 @@ contract Bridge is usingOraclize{
         } else {
             emit LogNewOraclizeQuery("Oraclize query was sent for locked balance");
             string memory _parameters  = createQuery_value(_transferId);
-            oraclize_query("URL",api, _parameters);
+            oraclize_query("URL",api, _parameters, 3000000);
             //oraclize_query("URL","json(https://ropsten.infura.io/).result",'{"jsonrpc":"2.0","id":3,"method":"eth_call","params":[{"to":"0x76a83b371ab7232706eac16edf2b726f3a2dbe82","data":"0xad3b80a8"}, "latest"]}');
         }
     }
@@ -123,7 +123,7 @@ contract Bridge is usingOraclize{
         bytes32 _s_id = bytes32(u_id);
         string memory _id = Strings.fromB32(_s_id);
         string memory _code = strConcat(partnerBridge,',"data":"',Strings.fromCode(method_data),_id,'"},"latest"]}');
-        string memory _params2 = strConcat(' {"jsonrpc":"2.0","id":3,"method":"eth_call","params":[{"to":',_code);
+        string memory _params2 = strConcat(' {"jsonrpc":"2.0","id":60,"method":"eth_call","params":[{"to":',_code);
         return _params2;
     }
 
@@ -148,7 +148,7 @@ contract Bridge is usingOraclize{
         uint idStart = bts.length - 64;
 
         //the address portion will end where the id starts.
-        uint addrEnd = idStart-1;
+        uint addrEnd = idStart;
 
         //parse the last 40 bytes of the address hex.
         address _owner = Strings.parseAddr(Strings.substr(result, addrEnd-40, addrEnd));

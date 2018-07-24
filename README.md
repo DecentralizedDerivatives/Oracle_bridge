@@ -42,10 +42,24 @@ To withdraw from the dappchain, the functionality is identical only the role of 
 
 	Start the dapp chain
 	Open Ethereum Bridge on dapp chain
-	Create DappBridge contract with OARAddress
+	Create DappBridge contract with OARAddress 
 
     Enter deployed bridge contract address on opposite chain
     Enter API information on other chain (e.g. https://localhost:8545.result or https://mainnet.infura.io.result)
+
+Or for same-chain local setup:
+
+    Get a public port: npm install -g localtunnel
+    : lt --port 8000
+    New Terminal : ganache-cli -i 60
+    New terminal : ethereum-bridge -H localhost:8545 -a 1
+    New terminal: git clone https://github.com/DecentralizedDerivatives/oracle_bridge
+
+    Enter new OAR adress in script
+    : truffle compile
+    : truffle migrate
+    Open Ethereum Bridge on mainchain
+    Create Bridge contract with OARAddress 
 
 ## Structure
 
