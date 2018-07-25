@@ -50,12 +50,13 @@ To withdraw from the dappchain, the functionality is identical only the role of 
 Or for same-chain local setup:
 
     Get a public port: npm install -g localtunnel
-    : lt --port 8000
+    : lt --port 8545
     New Terminal : ganache-cli -i 60
     New terminal : ethereum-bridge -H localhost:8545 -a 1
     New terminal: git clone https://github.com/DecentralizedDerivatives/oracle_bridge
 
-    Enter new OAR adress in script
+    Enter new OAR adress in test script (local_test)
+    Enter new local host address in test script
     : truffle compile
     : truffle migrate
     Open Ethereum Bridge on mainchain

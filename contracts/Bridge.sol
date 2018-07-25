@@ -127,6 +127,7 @@ contract Bridge is usingOraclize{
         return _params2;
     }
 
+    event Print(uint,address,uint);
     /**
     * @dev Gets the oraclize query results as as string, parses the string to
     * get the amount, owner, transferID, updates the owner's/sender balance
@@ -143,22 +144,19 @@ contract Bridge is usingOraclize{
         bytes memory bts = bytes(result);
         //take the first 64 bytes and convert to uint
          uint _amount = Strings.hexToUint(Strings.substr(result, startIdx,64+startIdx));
-
         //id is at the end and will be 64 bytes. So grab its starting idx first.
         uint idStart = bts.length - 64;
-
         //the address portion will end where the id starts.
         uint addrEnd = idStart;
-
         //parse the last 40 bytes of the address hex.
         address _owner = Strings.parseAddr(Strings.substr(result, addrEnd-40, addrEnd));
-
         //then extract the id
         uint _transId = Strings.hexToUint(Strings.substr(result, idStart, bts.length));
         require(pulledTransaction[_transId] == false);
         deposited_balances[_owner] = deposited_balances[_owner].add(_amount);
         total_deposited_supply = total_deposited_supply.add(_amount);
         pulledTransaction[_transId] = true;
+        emit Print(_amount,_owner,_transId);
         emit LogUpdated(result);
     }
 

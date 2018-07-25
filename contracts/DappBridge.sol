@@ -136,7 +136,6 @@ contract DappBridge is usingOraclize, Wrapped_Token{
         string memory _params2 = strConcat(' {"jsonrpc":"2.0","id":60,"method":"eth_call","params":[{"to":',_code);
         return _params2;
     }
-        event Print(uint _amount,address _owner,uint _id);
     /**
     * @dev Gets the oraclize query results as as string, parses the string to
     * get the amount, owner, transferID, updates the owner's/sender side chain 
@@ -166,7 +165,6 @@ contract DappBridge is usingOraclize, Wrapped_Token{
         balances[_owner] = balances[_owner].add(_amount);
         total_supply = total_supply.add(_amount);
         pulledTransaction[_transId] = true;
-        emit Print(_amount,_owner,_transId);
         emit LogUpdated(result);
     }    
 
