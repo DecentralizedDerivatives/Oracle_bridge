@@ -13,12 +13,15 @@ function promisifyLogWatch(_event) {
       resolve(log);
     });
   });
-}
+};
+
+log = await logNewPriceWatcher_d;
+assert.equal(log.event, 'LogUpdated', 'LogCallback not emitted.');
 
 var DappBridge = artifacts.require("./DappBridge.sol");
 var Bridge = artifacts.require("./Bridge.sol");
-var OAR = "0x6f485c8bf6fc43ea212e93bbf8ce046c7f1cb475";
-var local_url = "json(https://purple-dingo-83.localtunnel.me).result"
+var OAR = "0x37dd0a1ceAdC20e81F4A9fd60757240124b3D5B9";
+var local_url = "json(https://tricky-baboon-7.localtunnel.me).result"
 contract('Contracts', function(accounts) {
   let dappBridge;
   let bridge;
@@ -100,4 +103,8 @@ contract('Contracts', function(accounts) {
       await bridge.withdraw({from:accounts[1]});
       assert(await (web3.fromWei(web3.eth.getBalance(accounts[1]), 'ether').toFixed(1)) >= parseInt(balance) + .3);
     });
+    //  it('Test Lock Limit', async function () {
+    // });
+    //      it('Test Mining Reward', async function () {
+    // });
    })

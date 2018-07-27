@@ -15,6 +15,7 @@ contract Bridge is usingOraclize{
     string public bridgedChain;
     uint public total_deposited_supply;
     uint public total_locked;
+    uint public locked_limit;
     uint transNonce;
     string public partnerBridge; //address of bridge contract on other chain
     string api;
@@ -42,6 +43,7 @@ contract Bridge is usingOraclize{
     /***Functions***/
     constructor() public {
         owner = msg.sender;
+        locked_limit = 2**256 - 1;
     }
  
     /***Modifiers***/
@@ -66,6 +68,10 @@ contract Bridge is usingOraclize{
         OAR = OraclizeAddrResolverI(_oar);
     }
 
+    function setLockedLimit(uint _limit) public onlyOwner(){
+        locked_limit = _limit;
+    }
+
     /**
     * @dev Allows for a transfer of tokens to sender once locked
     * The addressDetails memory _locked = transferDetails[_transferId];ss to send tokens to
@@ -74,6 +80,7 @@ contract Bridge is usingOraclize{
     function lockForTransfer() payable public returns(uint){
         require(msg.value > 0);
         total_locked = total_locked.add(msg.value);
+        require(total_locked <= locked_limit);
         transNonce += 1;
         transferDetails[transNonce] = Details({
             amount:msg.value,
@@ -155,6 +162,7 @@ contract Bridge is usingOraclize{
         require(pulledTransaction[_transId] == false);
         deposited_balances[_owner] = deposited_balances[_owner].add(_amount);
         total_deposited_supply = total_deposited_supply.add(_amount);
+        total_locked = total_locked.sub(_amount);
         pulledTransaction[_transId] = true;
         emit Print(_amount,_owner,_transId);
         emit LogUpdated(result);
