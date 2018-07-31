@@ -15,13 +15,10 @@ function promisifyLogWatch(_event) {
   });
 };
 
-log = await logNewPriceWatcher_d;
-assert.equal(log.event, 'LogUpdated', 'LogCallback not emitted.');
-
 var DappBridge = artifacts.require("./DappBridge.sol");
 var Bridge = artifacts.require("./Bridge.sol");
-var OAR = "0x37dd0a1ceAdC20e81F4A9fd60757240124b3D5B9";
-var local_url = "json(https://tricky-baboon-7.localtunnel.me).result"
+var OAR = "0x6f485C8BF6fc43eA212E93BBF8ce046C7f1cb475";
+var local_url = "json(https://short-goose-77.localtunnel.me).result"
 contract('Contracts', function(accounts) {
   let dappBridge;
   let bridge;

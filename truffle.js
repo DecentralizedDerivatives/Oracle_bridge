@@ -16,11 +16,12 @@ module.exports = {
       port: 8546,
       network_id: "*" // Match any network id
     },
-    // poa: {
-    //   provider: new HDWalletProvider(mnemonic, "http://54.174.159.43:8540"),
-    //   network_id:"*",
-    //   gas: 4612388
-    // },
+    poa: {
+      provider: new HDWalletProvider(mnemonic, "http://54.174.159.43:8540"),
+      network_id:"*",
+      gas: 4700000,
+      gasPrice: 5001
+    },
     ropsten: {
       provider: new HDWalletProvider(mnemonic, "https://ropsten.infura.io/zkGX3Vf8njIXiHEGRueB"),
       network_id: 3,
