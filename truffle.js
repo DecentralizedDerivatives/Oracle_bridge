@@ -18,7 +18,7 @@ module.exports = {
     },
     poa: {
       provider: new HDWalletProvider(mnemonic, "http://54.174.159.43:8540"),
-      network_id:"*",
+      network_id:"0x2323",
       gas: 4700000,
       gasPrice: 5001
     },

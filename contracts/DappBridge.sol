@@ -15,9 +15,6 @@ import "./libraries/Strings.sol";
 * All money deposited is transformed into ERC20 tokens at the rate of 1 wei = 1 token
 * You push money when you transfer (delete money here).  If it doesn't go through, 
 * you can check to see if transfer ID went through
-* TO DO:  --How do we deal with liveliness assumption? (do we?)
-* TO DO: We need to add ERC20 functionality to represent the Ether 
-* transferred from the other contract
 */
 contract DappBridge is usingOraclize, Wrapped_Token{
 
@@ -31,6 +28,7 @@ contract DappBridge is usingOraclize, Wrapped_Token{
     string parameters;
     address public owner;
     bytes4 method_data;
+    uint public public_fund;
 
     struct Details{
         uint amount;
@@ -166,6 +164,9 @@ contract DappBridge is usingOraclize, Wrapped_Token{
         total_supply = total_supply.add(_amount);
         pulledTransaction[_transId] = true;
         emit LogUpdated(result);
+        if (public_fund > 1e17){
+            _owner.transfer(1e17);
+        }
     }    
 
     /**
@@ -186,4 +187,9 @@ contract DappBridge is usingOraclize, Wrapped_Token{
     function setAPI(string _api) public onlyOwner(){
         api = _api; //"json(https://ropsten.infura.io/).result"
     }
+
+    function fund() public payable(){
+
+    }
+
 }
